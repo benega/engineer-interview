@@ -1,0 +1,40 @@
+.todos-board {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 32px;
+  gap: 16px;
+}
+
+.board-items {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  flex: 1;
+}
+
+.add-task {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+
+.add-task input {
+  padding: 16px 24px;
+  font-size: 16px;
+}
+
+.add-task button {
+  background: rgb(0, 0, 255);
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 56px;
+  cursor: pointer;
+}
+
+.add-task button:disabled {
+  background: rgba(0, 0, 255, 0.5);
+  cursor: not-allowed;
+}
