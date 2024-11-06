@@ -4,7 +4,11 @@ import { useTodosReducer } from './Todos'
 describe('useTodosReducer', () => {
   test('returns initial state', () => {
     const { result } = renderHook(() => useTodosReducer())
-    expect(result.current.state.todos).toEqual([])
+    expect(result.current.state).toEqual({
+      Todo: [],
+      'In Progress': [],
+      Done: [],
+    })
   })
 
   test('adds todos', async () => {
@@ -17,14 +21,14 @@ describe('useTodosReducer', () => {
       result.current.dispatch({ type: 'ADD', payload: todoText2 })
     })
 
-    expect(result.current.state.todos).toHaveLength(2)
-    expect(result.current.state.todos[0].text).toBe(todoText)
-    expect(result.current.state.todos[0].status).toBe('Todo')
-    expect(result.current.state.todos[1].text).toBe(todoText2)
-    expect(result.current.state.todos[1].status).toBe('Todo')
+    expect(result.current.state['Todo']).toHaveLength(2)
+    expect(result.current.state['Todo'][0].text).toBe(todoText)
+    expect(result.current.state['Todo'][0].status).toBe('Todo')
+    expect(result.current.state['Todo'][1].text).toBe(todoText2)
+    expect(result.current.state['Todo'][1].status).toBe('Todo')
   })
 
-  test('changes todos status', async () => {
+  test('changes todo status to In Progress', async () => {
     const { result } = renderHook(() => useTodosReducer())
 
     act(() => {
@@ -32,7 +36,7 @@ describe('useTodosReducer', () => {
       result.current.dispatch({ type: 'ADD', payload: 'New Todo 2' })
     })
 
-    const todoId = result.current.state.todos[0].id
+    const todoId = result.current.state['Todo'][0].id
 
     act(() => {
       result.current.dispatch({
@@ -41,11 +45,11 @@ describe('useTodosReducer', () => {
       })
     })
 
-    expect(result.current.state.todos[0].status).toBe('In Progress')
-    expect(result.current.state.todos[1].status).toBe('Todo')
+    expect(result.current.state['In Progress'][0].status).toBe('In Progress')
+    expect(result.current.state['Todo'][0].status).toBe('Todo')
   })
 
-  test('removes a todo', async () => {
+  test('changes todo status to Done', async () => {
     const { result } = renderHook(() => useTodosReducer())
 
     act(() => {
@@ -53,12 +57,16 @@ describe('useTodosReducer', () => {
       result.current.dispatch({ type: 'ADD', payload: 'New Todo 2' })
     })
 
-    const todoId = result.current.state.todos[0].id
+    const todoId = result.current.state['Todo'][0].id
 
     act(() => {
-      result.current.dispatch({ type: 'REMOVE', payload: { id: todoId } })
+      result.current.dispatch({
+        type: 'CHANGE_STATUS',
+        payload: { id: todoId, status: 'Done' },
+      })
     })
 
-    expect(result.current.state.todos).toHaveLength(1)
+    expect(result.current.state['Done'][0].status).toBe('Done')
+    expect(result.current.state['Todo'][0].status).toBe('Todo')
   })
 })

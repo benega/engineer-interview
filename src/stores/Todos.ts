@@ -1,43 +1,57 @@
 import { useReducer } from 'react'
 import { v4 as uuid } from 'uuid'
-import { Todo } from '../types/Todo'
+import { Todo, TodoStatus } from '../types/Todo'
 
-export type TodosState = {
-  todos: Todo[]
-}
+export type TodosState = { [key in TodoStatus]: Todo[] }
 
 export type TodoAction =
   | { type: 'ADD'; payload: string }
   | { type: 'CHANGE_STATUS'; payload: Pick<Todo, 'id' | 'status'> }
-  | { type: 'REMOVE'; payload: Pick<Todo, 'id'> }
 
-const initialState: TodosState = {
-  todos: [],
+const initialState: TodosState = { Todo: [], 'In Progress': [], Done: [] }
+
+function getById(state: TodosState, id: string) {
+  for (const status in state) {
+    const todo = state[status as TodoStatus]?.find((todo) => todo.id === id)
+    if (todo) return todo
+  }
 }
 
-const reducer = (state: TodosState, action: TodoAction): TodosState => {
-  switch (action.type) {
+function addNewTodo(state: TodosState, text: string) {
+  const newTodo: Todo = {
+    id: uuid(),
+    text,
+    status: 'Todo',
+  }
+  return {
+    ...state,
+    Todo: [...state.Todo, newTodo],
+  }
+}
+
+function changeTodoStatus(
+  state: TodosState,
+  { id, status }: Pick<Todo, 'id' | 'status'>
+) {
+  const oldTodo = getById(state, id)
+  if (!oldTodo) return state
+
+  return {
+    ...state,
+    [oldTodo.status]: state[oldTodo.status].filter((todo) => todo.id !== id),
+    [status]: [...state[status], { ...oldTodo, status: status }],
+  }
+}
+
+const reducer = (
+  state: TodosState,
+  { type, payload }: TodoAction
+): TodosState => {
+  switch (type) {
     case 'ADD':
-      const newTodo: Todo = {
-        id: uuid(),
-        text: action.payload,
-        status: 'Todo',
-      }
-      return { ...state, todos: [...state.todos, newTodo] }
+      return addNewTodo(state, payload)
     case 'CHANGE_STATUS':
-      return {
-        ...state,
-        todos: state.todos.map((todo) =>
-          todo.id === action.payload.id
-            ? { ...todo, status: action.payload.status }
-            : todo
-        ),
-      }
-    case 'REMOVE':
-      return {
-        ...state,
-        todos: state.todos.filter((todo) => todo.id !== action.payload.id),
-      }
+      return changeTodoStatus(state, payload)
     default:
       return state
   }
