@@ -42,13 +42,9 @@ const makeSut = () => {
   return { user }
 }
 
-describe('TodosBoard', () => {
+describe('<TodosBoard />', () => {
   const mockDispatch = jest.fn()
-  const mockState: TodosState = {
-    Todo: [],
-    'In Progress': [],
-    Done: [],
-  }
+  const mockState: TodosState = { Todo: [], 'In Progress': [], Done: [] }
 
   beforeEach(() => {
     ;(useTodosReducer as jest.Mock).mockReturnValue({
